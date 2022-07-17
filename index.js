@@ -1,14 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const app = express();
-const { getTalker } = require('./utils/fs-talker');
 const msg = require('./utils/messages');
+const { getTalker } = require('./utils/fs-talker');
+const generateToken = require('./utils/generateToken');
+const loginValidation = require('./middlewares/login');
+
+const app = express();
+const PORT = '3000';
+const HTTP_OK_STATUS = 200;
+const HTTP_NOT_FOUND = 404;
 
 app.use(bodyParser.json());
-
-const HTTP_OK_STATUS = 200;
-const PORT = '3000';
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -19,9 +22,9 @@ app.get('/', (_request, response) => {
 app.get('/talker', async (_req, res) => {
   const tk = await getTalker();
   
-  if (!tk) return res.status(200).json([]);
+  if (!tk) return res.status(HTTP_OK_STATUS).json([]);
   
-  return res.status(200).json(tk);
+  return res.status(HTTP_OK_STATUS).json(tk);
 });
 
 // Crie o endpoint GET /talker/:id
@@ -31,9 +34,15 @@ app.get('/talker/:id', async (req, res) => {
 
   const talkerById = tk.find((talker) => talker.id === Number(id));
   
-  if (!talkerById) return res.status(404).json(msg.TALKER_NOT_FOUND);
+  if (!talkerById) return res.status(HTTP_NOT_FOUND).json(msg.TALKER_NOT_FOUND);
   
-  return res.status(200).json(talkerById);
+  return res.status(HTTP_OK_STATUS).json(talkerById);
+});
+
+// Crie o endpoint POST /login
+app.post('/login', loginValidation, (_req, res) => {
+  const token = generateToken();
+  return res.status(HTTP_OK_STATUS).json({ token });
 });
 
 app.listen(PORT, () => {
