@@ -60,6 +60,21 @@ app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, as
   return res.status(201).json(AddedTalker);
 });
 
+// 6 - Crie o endpoint PUT /talker/:id
+app.put('/talker/:id', authToken, authName, authAge, authTalk, authWt, authRate, async (rq, rs) => {
+  const id = Number(rq.params.id);
+  const { name, age, talk } = rq.body;
+  
+  const tk = await getTalker();
+  const editedTalker = { id, name, age, talk };
+  const idx = tk.findIndex((talker) => talker.id === id);
+  tk[idx] = editedTalker;
+
+  await setTalker(tk);
+    
+  return rs.status(HTTP_OK_STATUS).json(editedTalker);
+});
+
 // 7 - Crie o endpoint DELETE /talker/:id
 app.delete('/talker/:id', authToken, async (req, res) => {
   const id = Number(req.params.id);
