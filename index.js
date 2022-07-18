@@ -20,7 +20,7 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-// Crie o endpoint GET /talker
+// 1 - Crie o endpoint GET /talker
 app.get('/talker', async (_req, res) => {
   const tk = await getTalker();
   
@@ -29,7 +29,7 @@ app.get('/talker', async (_req, res) => {
   return res.status(HTTP_OK_STATUS).json(tk);
 });
 
-// Crie o endpoint GET /talker/:id
+// 2 - Crie o endpoint GET /talker/:id
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const tk = await getTalker();
@@ -41,13 +41,13 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(HTTP_OK_STATUS).json(talkerById);
 });
 
-// Crie o endpoint POST /login
+// 3 - Crie o endpoint POST /login
 app.post('/login', loginValidation, (_req, res) => {
   const token = generateToken();
   return res.status(HTTP_OK_STATUS).json({ token });
 });
 
-// Crie o endpoint POST /talker
+// 5 - Crie o endpoint POST /talker
 app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, async (req, res) => {
   const { name, age, talk } = req.body;
   
@@ -58,6 +58,17 @@ app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, as
   await setTalker(tk);
   
   return res.status(201).json(AddedTalker);
+});
+
+// 7 - Crie o endpoint DELETE /talker/:id
+app.delete('/talker/:id', authToken, async (req, res) => {
+  const id = Number(req.params.id);
+
+  const tk = await getTalker();
+  const filterTk = tk.filter((talker) => talker.id !== id);
+  await setTalker(filterTk);
+
+  return res.status(204).end();
 });
 
 app.listen(PORT, () => {
