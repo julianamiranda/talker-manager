@@ -2,9 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const msg = require('./utils/messages');
-const { getTalker } = require('./utils/fs-talker');
 const generateToken = require('./utils/generateToken');
 const loginValidation = require('./middlewares/login');
+const { getTalker, setTalker } = require('./utils/fs-talker');
+const { authToken, authName, authAge,
+  authTalk, authWt, authRate } = require('./middlewares/talk-auth');
 
 const app = express();
 const PORT = '3000';
@@ -43,6 +45,19 @@ app.get('/talker/:id', async (req, res) => {
 app.post('/login', loginValidation, (_req, res) => {
   const token = generateToken();
   return res.status(HTTP_OK_STATUS).json({ token });
+});
+
+// Crie o endpoint POST /talker
+app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, async (req, res) => {
+  const { name, age, talk } = req.body;
+  
+  const tk = await getTalker();
+  const AddedTalker = { id: tk.length + 1, name, age, talk };
+  tk.push(AddedTalker);
+  
+  await setTalker(tk);
+  
+  return res.status(201).json(AddedTalker);
 });
 
 app.listen(PORT, () => {
