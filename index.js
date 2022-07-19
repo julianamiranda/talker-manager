@@ -11,6 +11,8 @@ const { authToken, authName, authAge,
 const app = express();
 const PORT = '3000';
 const HTTP_OK_STATUS = 200;
+const HTTP_CREATED = 201;
+const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 
 app.use(bodyParser.json());
@@ -18,6 +20,19 @@ app.use(bodyParser.json());
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
+});
+
+// 8 - Crie o endpoint GET /talker/search?q=searchTerm
+app.get('/talker/search', authToken, async (req, res) => {
+  const q = (req.query.q).toLowerCase();
+
+  const tk = await getTalker();
+  const search = tk.filter(({ name }) => name.toLowerCase().includes(q));
+  
+  if (!q) return res.status(HTTP_OK_STATUS).json(tk);
+  if (!search) return res.status(HTTP_OK_STATUS).json([]);
+
+  return res.status(HTTP_OK_STATUS).json(search);
 });
 
 // 1 - Crie o endpoint GET /talker
@@ -55,7 +70,7 @@ app.delete('/talker/:id', authToken, async (req, res) => {
   const filterTk = tk.filter((talker) => talker.id !== id);
   await setTalker(filterTk);
 
-  return res.status(204).end();
+  return res.status(HTTP_NO_CONTENT).end();
 });
 
 app.use(authToken, authName, authAge, authTalk, authWt, authRate);
@@ -70,7 +85,7 @@ app.post('/talker', async (req, res) => {
   
   await setTalker(tk);
   
-  return res.status(201).json(AddedTalker);
+  return res.status(HTTP_CREATED).json(AddedTalker);
 });
 
 // 6 - Crie o endpoint PUT /talker/:id
