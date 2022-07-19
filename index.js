@@ -47,8 +47,21 @@ app.post('/login', loginValidation, (_req, res) => {
   return res.status(HTTP_OK_STATUS).json({ token });
 });
 
+// 7 - Crie o endpoint DELETE /talker/:id
+app.delete('/talker/:id', authToken, async (req, res) => {
+  const id = Number(req.params.id);
+
+  const tk = await getTalker();
+  const filterTk = tk.filter((talker) => talker.id !== id);
+  await setTalker(filterTk);
+
+  return res.status(204).end();
+});
+
+app.use(authToken, authName, authAge, authTalk, authWt, authRate);
+
 // 5 - Crie o endpoint POST /talker
-app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, async (req, res) => {
+app.post('/talker', async (req, res) => {
   const { name, age, talk } = req.body;
   
   const tk = await getTalker();
@@ -61,9 +74,9 @@ app.post('/talker', authToken, authName, authAge, authTalk, authWt, authRate, as
 });
 
 // 6 - Crie o endpoint PUT /talker/:id
-app.put('/talker/:id', authToken, authName, authAge, authTalk, authWt, authRate, async (rq, rs) => {
-  const id = Number(rq.params.id);
-  const { name, age, talk } = rq.body;
+app.put('/talker/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const { name, age, talk } = req.body;
   
   const tk = await getTalker();
   const editedTalker = { id, name, age, talk };
@@ -72,18 +85,7 @@ app.put('/talker/:id', authToken, authName, authAge, authTalk, authWt, authRate,
 
   await setTalker(tk);
     
-  return rs.status(HTTP_OK_STATUS).json(editedTalker);
-});
-
-// 7 - Crie o endpoint DELETE /talker/:id
-app.delete('/talker/:id', authToken, async (req, res) => {
-  const id = Number(req.params.id);
-
-  const tk = await getTalker();
-  const filterTk = tk.filter((talker) => talker.id !== id);
-  await setTalker(filterTk);
-
-  return res.status(204).end();
+  return res.status(HTTP_OK_STATUS).json(editedTalker);
 });
 
 app.listen(PORT, () => {

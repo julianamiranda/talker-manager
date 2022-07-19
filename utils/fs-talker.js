@@ -1,11 +1,7 @@
 const fs = require('fs').promises;
 
-function getTalker() {
-  return fs.readFile('./talker.json', 'utf-8').then((fileContent) => JSON.parse(fileContent));
-}
+const getTalker = () => fs.readFile('./talker.json', 'utf-8').then((d) => JSON.parse(d));
 
-function setTalker(data) {
-  return fs.writeFile('./talker.json', JSON.stringify(data));
-}
+const setTalker = (data) => fs.writeFile('./talker.json', JSON.stringify(data));
 
 module.exports = { getTalker, setTalker };
